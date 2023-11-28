@@ -2,6 +2,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.ensemble import IsolationForest
+import pandas as pd
 
 # Function to simulate a data stream with pattern, seasonality, and noise
 def generate_data_stream(size=1000, freq=0.01, seasonality_freq=0.05, noise_level=1):
@@ -18,6 +19,7 @@ def detect_anomalies(data, model,contamination):
 
 # Function for real-time visualization
 def visualize_data_stream(data, anomalies, threshold=0):
+    plt.figure(figsize=(12,6))
     plt.plot(data, label='Data Stream')
     plt.scatter(np.where(anomalies < threshold), data[anomalies < threshold], color='red', label='Anomalies')
     plt.xlabel('Time')
@@ -25,6 +27,17 @@ def visualize_data_stream(data, anomalies, threshold=0):
     plt.title('Final Data Stream Visualization with Anomalies')
     plt.legend()
     plt.show()
+
+def input_to_csv(data, filename='data_stream_input.csv'):
+    df = pd.DataFrame({'Data': data})
+    df.to_csv(filename)
+    print("Generated data (input) csv generated")
+
+def output_to_csv(data, anomalies, filename='data_stream_output.csv'):
+    anomaly_labels = np.where(anomalies == -1, 'YES', 'NO')
+    df = pd.DataFrame({'Data': data, 'Anomaly': anomalies, 'Anomaly_Label': anomaly_labels})
+    df.to_csv(filename)
+    print("Output csv generated.")
 
 # Main script
 if __name__ == "__main__":
@@ -55,5 +68,11 @@ if __name__ == "__main__":
     # Final anomaly detection
     anomalies = detect_anomalies(np.array(accumulated_data), model, contamination)
 
+    # Store input data
+    input_to_csv(data_stream)
+    # Store output data
+    output_to_csv(data_stream,anomalies)
+
     # Final visualization
     visualize_data_stream(np.array(accumulated_data), anomalies, threshold=0)
+
